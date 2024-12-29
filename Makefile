@@ -1,4 +1,4 @@
-.PHONY: setup clean train help show-log activate test test-architecture test-augmentations
+.PHONY: setup clean train help show-log activate test test-architecture test-augmentations test-with-coverage
 
 # Variables
 CONDA_ENV_NAME = era-assignment-8
@@ -51,7 +51,8 @@ setup:
 	$(CONDA_ACTIVATE) $(CONDA_ENV_NAME) && \
 	$(PYTORCH_INSTALL) && \
 	$(CONDA_ACTIVATE) $(CONDA_ENV_NAME) && \
-	pip install -r requirements.txt
+	pip install -r requirements.txt && \
+	pip install pytest pytest-cov coverage-badge && \
 	@echo "Setup complete. Use 'make activate' to activate the environment"
 
 activate:
@@ -102,3 +103,11 @@ test-architecture:
 
 test-augmentations:
 	PYTHONPATH=$(PYTHONPATH) pytest tests/test_augmentations.py -v
+
+test-with-coverage:
+	@if ! command -v pytest >/dev/null 2>&1; then \
+		echo "pytest not found. Installing required packages..."; \
+		pip install pytest pytest-cov coverage-badge; \
+	fi
+	PYTHONPATH=$(PYTHONPATH) pytest tests/ --cov=models --cov=utils -v --cov-report=html
+	coverage-badge -f -o tests/status_badge.svg
